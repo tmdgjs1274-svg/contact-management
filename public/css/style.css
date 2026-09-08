@@ -126,8 +126,46 @@ main {
 }
 .card h2 {
   font-size: 15px;
-  margin: 0 0 12px;
+  margin: 0;
   color: var(--text-soft);
+}
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.icon-text-btn {
+  border: none;
+  background: var(--lavender-light);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.icon-btn {
+  border: none;
+  background: var(--lavender-light);
+  font-size: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  line-height: 1;
+}
+.link-btn {
+  border: none;
+  background: none;
+  color: var(--pink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
 }
 
 /* 소원권 잔여 카드 */
@@ -135,7 +173,6 @@ main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 12px;
-  margin-bottom: 16px;
 }
 .balance-item {
   background: linear-gradient(135deg, var(--pink-light), var(--lavender-light));
@@ -150,7 +187,8 @@ main {
 .form-row select,
 .form-row input[type="text"],
 .form-row input[type="number"],
-.form-row input[type="month"] {
+.form-row input[type="month"],
+.form-row textarea {
   flex: 1;
   min-width: 90px;
   padding: 10px 12px;
@@ -158,6 +196,8 @@ main {
   border: 1px solid #eee;
   background: #faf7fa;
   font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
 }
 .delta-buttons { display: flex; gap: 6px; align-items: center; }
 .delta-buttons button {
@@ -178,7 +218,6 @@ main {
   border: 1px solid #eee;
 }
 .btn-primary {
-  width: 100%;
   padding: 12px;
   border: none;
   border-radius: 12px;
@@ -187,18 +226,19 @@ main {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 6px;
 }
 .btn-primary:hover { opacity: 0.92; }
 .btn-secondary {
-  padding: 8px 14px;
+  padding: 10px 14px;
   border-radius: 10px;
   border: none;
   background: var(--lavender-light);
   color: var(--text);
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
+.btn-block { width: 100%; }
 
 .msg { font-size: 13px; min-height: 16px; margin-top: 8px; }
 .msg.ok { color: #4d8f6c; }
@@ -220,50 +260,215 @@ main {
 .history-list .h-delta.plus { color: #4d8f6c; font-weight: 700; }
 .history-list .h-delta.minus { color: var(--danger); font-weight: 700; }
 
-/* 집안일 테이블 */
-.chore-row {
+/* 월 이동 */
+.month-nav {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  position: relative;
+}
+.month-arrow {
+  border: none;
+  background: var(--lavender-light);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text);
+}
+.month-label {
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+/* 집안일 카드 (배정 목록) */
+.assignment-cards { display: flex; flex-direction: column; gap: 10px; }
+.assignment-card {
+  background: linear-gradient(135deg, #fff, var(--lavender-light) 180%);
+  border: 1px solid #f2e9f5;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.assignment-card-top {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.assignment-card .chore-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.assignment-card .chore-note {
+  font-size: 12px;
+  color: var(--text-soft);
+  margin-top: 2px;
+  white-space: pre-wrap;
+}
+.assignment-card .remove-btn {
+  border: none;
+  background: none;
+  color: #c9c2cc;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+.assignment-card .remove-btn:hover { color: var(--danger); }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid #eadff0;
+  background: white;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip.selected {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: white;
+}
+.chip.unassigned.selected {
+  background: var(--text-soft);
+  border-color: var(--text-soft);
+}
+
+/* 집안일 목록 관리 (모달 안) */
+.manage-item {
   padding: 10px 0;
   border-bottom: 1px solid #f2edf2;
 }
-.chore-row:last-child { border-bottom: none; }
-.chore-row .chore-name { font-size: 14px; flex: 1; }
-.chore-row select {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid #eee;
-  background: #faf7fa;
-  font-size: 13px;
+.manage-item:last-child { border-bottom: none; }
+.manage-item .form-row { margin-bottom: 6px; }
+.manage-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
+.manage-item-actions button {
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.manage-item-actions .save-btn { color: var(--pink); }
+.manage-item-actions .delete-btn { color: var(--danger); }
 
-.manage-row {
+/* 이 달에 추가 가능한 집안일 목록 */
+.available-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #f2edf2;
   font-size: 14px;
 }
-.manage-row:last-child { border-bottom: none; }
-.manage-row button {
+.available-item:last-child { border-bottom: none; }
+.available-item button {
   border: none;
-  background: none;
-  color: var(--danger);
-  font-size: 13px;
+  background: var(--pink);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .empty { color: var(--text-soft); font-size: 13px; text-align: center; padding: 12px 0; }
 
-.month-picker { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.month-picker input { padding: 8px 12px; border-radius: 10px; border: 1px solid #eee; }
-
-details.manage-section summary {
-  cursor: pointer;
+/* ---------- 모달 ---------- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 40, 55, 0.35);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: var(--card);
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 24px rgba(60, 40, 55, 0.2);
+}
+@media (min-width: 540px) {
+  .modal-overlay { align-items: center; }
+  .modal-box { border-radius: 20px; max-height: 80vh; }
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f2edf2;
+}
+.modal-header h3 { margin: 0; font-size: 16px; }
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 16px;
   color: var(--text-soft);
+  cursor: pointer;
+}
+.modal-body {
+  padding: 16px 20px 24px;
+  overflow-y: auto;
+}
+.modal-divider {
+  border: none;
+  border-top: 1px solid #f2edf2;
+  margin: 18px 0;
+}
+.modal-subtitle {
   font-size: 13px;
-  margin-top: 6px;
+  color: var(--text-soft);
+  margin: 0 0 10px;
+}
+
+.member-name-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.member-name-row input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #faf7fa;
+  font-size: 14px;
+}
+.member-name-row button {
+  border: none;
+  background: var(--lavender-light);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
 }

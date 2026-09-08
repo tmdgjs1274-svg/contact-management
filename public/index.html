@@ -21,9 +21,55 @@
     <!-- ============ 소원권 ============ -->
     <section id="view-wish" class="view active">
       <div class="card">
-        <h2>현재 보유 개수</h2>
+        <div class="card-header-row">
+          <h2>현재 보유 개수</h2>
+          <button class="icon-text-btn" id="openWishSettingsBtn">⚙️ 소원권 관리</button>
+        </div>
         <div id="balanceGrid" class="balance-grid"></div>
+      </div>
 
+      <div class="card">
+        <div class="card-header-row">
+          <h2>변경 이력</h2>
+          <button class="link-btn" id="openHistoryModalBtn">전체보기</button>
+        </div>
+        <ul id="historyListRecent" class="history-list"></ul>
+        <p id="historyEmpty" class="empty" style="display:none">아직 기록이 없어요.</p>
+      </div>
+    </section>
+
+    <!-- ============ 집안일 ============ -->
+    <section id="view-chore" class="view">
+      <div class="card">
+        <div class="card-header-row">
+          <h2>월별 담당자</h2>
+          <button class="icon-btn" id="openChoreSettingsBtn" title="집안일 목록 관리">⚙️</button>
+        </div>
+
+        <div class="month-nav">
+          <button class="month-arrow" id="prevMonthBtn">‹</button>
+          <button class="month-label" id="monthLabel"></button>
+          <button class="month-arrow" id="nextMonthBtn">›</button>
+          <input type="month" id="monthPickerHidden" style="position:absolute; opacity:0; pointer-events:none; width:1px; height:1px;" />
+        </div>
+
+        <div id="assignmentCards" class="assignment-cards"></div>
+        <p id="assignmentEmpty" class="empty" style="display:none">아직 이 달에 추가된 집안일이 없어요.</p>
+
+        <button class="btn-secondary btn-block" id="openAddChoreModalBtn" style="margin-top:12px">➕ 이 달에 집안일 추가</button>
+        <p id="assignmentMsg" class="msg"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ 모달: 소원권 관리 ============ -->
+  <div class="modal-overlay" id="wishSettingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>💝 소원권 관리</h3>
+        <button class="modal-close" data-close>✕</button>
+      </div>
+      <div class="modal-body">
         <div class="form-row">
           <select id="wishMember"></select>
         </div>
@@ -42,42 +88,68 @@
           <button class="btn-secondary" id="wishSubBtn" style="flex:1">➖ 빼기로 적용</button>
         </div>
         <p id="wishMsg" class="msg"></p>
-      </div>
 
-      <div class="card">
-        <h2>변경 이력</h2>
-        <ul id="historyList" class="history-list"></ul>
-        <p id="historyEmpty" class="empty" style="display:none">아직 기록이 없어요.</p>
-      </div>
-    </section>
+        <hr class="modal-divider" />
 
-    <!-- ============ 집안일 ============ -->
-    <section id="view-chore" class="view">
-      <div class="card">
-        <h2>월별 담당자</h2>
-        <div class="month-picker">
-          <input type="month" id="monthPicker" />
+        <h4 class="modal-subtitle">이름 설정</h4>
+        <div id="memberNameEditList"></div>
+        <p id="memberNameMsg" class="msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 모달: 소원권 전체 이력 ============ -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>변경 이력 전체보기</h3>
+        <button class="modal-close" data-close>✕</button>
+      </div>
+      <div class="modal-body">
+        <ul id="historyListFull" class="history-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 모달: 집안일 목록 관리 ============ -->
+  <div class="modal-overlay" id="choreSettingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>⚙️ 집안일 목록 관리</h3>
+        <button class="modal-close" data-close>✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="choreManageList"></div>
+
+        <hr class="modal-divider" />
+
+        <h4 class="modal-subtitle">새 집안일 추가</h4>
+        <div class="form-row">
+          <input type="text" id="newChoreName" placeholder="집안일 이름" />
         </div>
-        <div id="assignmentList"></div>
-        <p id="assignmentEmpty" class="empty" style="display:none">등록된 집안일이 없어요. 아래에서 추가해보세요.</p>
-        <p id="assignmentMsg" class="msg"></p>
+        <div class="form-row">
+          <textarea id="newChoreNote" placeholder="상세 메모 (선택, 예: 매주 화/목요일)" rows="2"></textarea>
+        </div>
+        <button class="btn-primary" id="addChoreBtn">추가</button>
+        <p id="choreMsg" class="msg"></p>
       </div>
+    </div>
+  </div>
 
-      <div class="card">
-        <details class="manage-section">
-          <summary>⚙️ 집안일 목록 관리</summary>
-          <div style="margin-top:12px">
-            <div id="choreManageList"></div>
-            <div class="form-row" style="margin-top:10px">
-              <input type="text" id="newChoreName" placeholder="새 집안일 이름" />
-              <button class="btn-secondary" id="addChoreBtn">추가</button>
-            </div>
-            <p id="choreMsg" class="msg"></p>
-          </div>
-        </details>
+  <!-- ============ 모달: 이 달에 집안일 추가 ============ -->
+  <div class="modal-overlay" id="addChoreModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>➕ 이 달에 집안일 추가</h3>
+        <button class="modal-close" data-close>✕</button>
       </div>
-    </section>
-  </main>
+      <div class="modal-body">
+        <div id="availableChoreList"></div>
+        <p id="availableChoreEmpty" class="empty" style="display:none">추가할 수 있는 집안일이 없어요. 먼저 ⚙️ 목록 관리에서 만들어주세요.</p>
+        <p id="addChoreMsg" class="msg"></p>
+      </div>
+    </div>
+  </div>
 
   <script src="/js/app.js"></script>
 </body>
