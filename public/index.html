@@ -106,7 +106,22 @@
         <button class="modal-close" data-close>✕</button>
       </div>
       <div class="modal-body">
+        <div class="history-filter">
+          <div class="quick-filter-row">
+            <button type="button" data-range="1m">1개월</button>
+            <button type="button" data-range="3m" class="active">3개월</button>
+            <button type="button" data-range="6m">6개월</button>
+            <button type="button" data-range="1y">1년</button>
+            <button type="button" data-range="all">전체</button>
+          </div>
+          <div class="custom-range-row">
+            <input type="date" id="historyFrom" />
+            <span>~</span>
+            <input type="date" id="historyTo" />
+          </div>
+        </div>
         <ul id="historyListFull" class="history-list"></ul>
+        <p id="historyFullEmpty" class="empty" style="display:none">해당 기간의 기록이 없어요.</p>
       </div>
     </div>
   </div>

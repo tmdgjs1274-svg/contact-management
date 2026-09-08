@@ -60,8 +60,8 @@ router.get('/wish-tokens', async (req, res, next) => {
     const history = log
       .slice()
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 100)
       .map((l) => ({
+        id: l.id,
         timestamp: l.timestamp,
         member: l.member,
         delta: parseInt(l.delta, 10) || 0,
@@ -70,6 +70,83 @@ router.get('/wish-tokens', async (req, res, next) => {
       }));
 
     res.json({ balances, history });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 특정 멤버의 이력을 시간순으로 다시 훑으며 balanceAfter(그 시점까지의 누적 잔여)를 재계산한다.
+// 이력을 수정하거나 삭제하면 그 뒤에 이어지는 기록들의 "변경 후 잔여" 표시가 어긋나므로 항상 다시 맞춰준다.
+async function recomputeBalanceAfter(memberName) {
+  const log = await readSheet('WishTokenLog');
+  const entries = log
+    .filter((l) => l.member === memberName)
+    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  let running = 0;
+  for (const entry of entries) {
+    running += parseInt(entry.delta, 10) || 0;
+    if (parseInt(entry.balanceAfter, 10) !== running) {
+      await updateRow('WishTokenLog', entry._row, {
+        id: entry.id,
+        timestamp: entry.timestamp,
+        member: entry.member,
+        delta: entry.delta,
+        reason: entry.reason,
+        balanceAfter: running,
+      });
+    }
+  }
+}
+
+// 이력 한 건 수정 (대상/변경량/사유). 대상이나 변경량이 바뀌면 관련된 멤버들의 잔여 이력을 다시 계산한다.
+router.patch('/wish-tokens/:id', async (req, res, next) => {
+  try {
+    const { member, delta, reason } = req.body || {};
+    const log = await readSheet('WishTokenLog');
+    const target = log.find((l) => l.id === req.params.id);
+    if (!target) return res.status(404).json({ error: '해당 이력을 찾을 수 없습니다.' });
+
+    const members = await readSheet('Members');
+    const newMember = member !== undefined && member ? String(member) : target.member;
+    const newDelta = delta !== undefined ? parseInt(delta, 10) : parseInt(target.delta, 10);
+    const newReason = reason !== undefined ? String(reason).trim() : target.reason;
+
+    if (!members.some((m) => m.name === newMember)) {
+      return res.status(400).json({ error: '존재하지 않는 멤버입니다.' });
+    }
+    if (!Number.isFinite(newDelta) || newDelta === 0) {
+      return res.status(400).json({ error: '변경량은 0이 아닌 정수여야 합니다.' });
+    }
+
+    const oldMember = target.member;
+    await updateRow('WishTokenLog', target._row, {
+      id: target.id,
+      timestamp: target.timestamp,
+      member: newMember,
+      delta: newDelta,
+      reason: newReason,
+      balanceAfter: target.balanceAfter, // 아래 recomputeBalanceAfter 에서 다시 계산됨
+    });
+
+    await recomputeBalanceAfter(newMember);
+    if (oldMember !== newMember) await recomputeBalanceAfter(oldMember);
+
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// 이력 한 건 삭제
+router.delete('/wish-tokens/:id', async (req, res, next) => {
+  try {
+    const log = await readSheet('WishTokenLog');
+    const target = log.find((l) => l.id === req.params.id);
+    if (!target) return res.status(404).json({ error: '해당 이력을 찾을 수 없습니다.' });
+    const member = target.member;
+    await deleteRow('WishTokenLog', target._row);
+    await recomputeBalanceAfter(member);
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

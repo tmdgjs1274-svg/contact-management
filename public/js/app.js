@@ -103,6 +103,13 @@ document.getElementById('openWishSettingsBtn').addEventListener('click', () => {
   openModal('wishSettingsModal');
 });
 document.getElementById('openHistoryModalBtn').addEventListener('click', () => {
+  document.querySelectorAll('.quick-filter-row button').forEach((b) => b.classList.remove('active'));
+  const btn3m = document.querySelector('.quick-filter-row button[data-range="3m"]');
+  btn3m.classList.add('active');
+  const { from, to } = computeQuickRange('3m');
+  document.getElementById('historyFrom').value = toDateInputValue(from);
+  document.getElementById('historyTo').value = toDateInputValue(to);
+  applyHistoryFilter();
   openModal('historyModal');
 });
 
@@ -186,7 +193,18 @@ async function submitWish(sign) {
   }
 }
 
-function renderHistoryItems(container, items) {
+// 멤버가 시트에 등록된 순서를 기준으로 색상 클래스를 결정 (0=블루, 1=핑크, 2=퍼플, 3=민트)
+// 이름이 바뀌었거나(과거 이력) 더 이상 존재하지 않는 멤버는 기본값(핑크)으로 표시
+function memberColorClass(memberName) {
+  const palette = ['color-0', 'color-1', 'color-2', 'color-3'];
+  const idx = membersCache.findIndex((m) => m.name === memberName);
+  return palette[idx >= 0 ? idx % palette.length : 1];
+}
+
+let wishHistoryCache = [];
+
+function renderHistoryItems(container, items, opts = {}) {
+  const editable = !!opts.editable;
   if (items.length === 0) {
     container.innerHTML = '';
     return false;
@@ -196,23 +214,100 @@ function renderHistoryItems(container, items) {
       const sign = h.delta > 0 ? '+' : '';
       const cls = h.delta > 0 ? 'plus' : 'minus';
       const date = formatDateTime(h.timestamp);
-      return `<li>
-        <span class="h-left">${date}<br><span class="h-member">${escapeHtml(h.member)}</span> ${escapeHtml(h.reason || '')}</span>
-        <span class="h-delta ${cls}">${sign}${h.delta}</span>
+      const badge = `<span class="name-badge ${memberColorClass(h.member)}">${escapeHtml(h.member)}</span>`;
+
+      const actions = editable
+        ? `<div class="h-actions">
+             <button type="button" class="h-edit-btn" data-id="${h.id}">수정</button>
+             <button type="button" class="h-del-btn" data-id="${h.id}">삭제</button>
+           </div>`
+        : '';
+
+      const editForm = editable
+        ? `<div class="h-edit-form" id="edit-form-${h.id}" style="display:none">
+             <div class="form-row">
+               <select class="h-edit-member">
+                 ${membersCache.map((m) => `<option value="${escapeHtml(m.name)}" ${m.name === h.member ? 'selected' : ''}>${escapeHtml(m.name)}</option>`).join('')}
+               </select>
+             </div>
+             <div class="form-row">
+               <input type="number" class="h-edit-delta" value="${h.delta}" />
+               <input type="text" class="h-edit-reason" value="${escapeHtml(h.reason || '')}" />
+             </div>
+             <div class="form-row">
+               <button type="button" class="btn-secondary h-save-btn" data-id="${h.id}" style="flex:1">저장</button>
+               <button type="button" class="btn-secondary h-cancel-btn" data-id="${h.id}" style="flex:1">취소</button>
+             </div>
+           </div>`
+        : '';
+
+      return `<li data-id="${h.id}">
+        <div class="h-row">
+          <span class="h-left">${date}<br>${badge} ${escapeHtml(h.reason || '')}</span>
+          <span class="h-delta ${cls}">${sign}${h.delta}</span>
+        </div>
+        ${actions}
+        ${editForm}
       </li>`;
     })
     .join('');
+
+  if (editable) {
+    container.querySelectorAll('.h-edit-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const form = document.getElementById('edit-form-' + btn.dataset.id);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+    container.querySelectorAll('.h-cancel-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.getElementById('edit-form-' + btn.dataset.id).style.display = 'none';
+      });
+    });
+    container.querySelectorAll('.h-del-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('이 기록을 삭제할까요? 보유 개수가 다시 계산돼요.')) return;
+        try {
+          await api('/wish-tokens/' + btn.dataset.id, { method: 'DELETE' });
+          await loadWishTokens();
+          applyHistoryFilter();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+    });
+    container.querySelectorAll('.h-save-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const li = container.querySelector(`li[data-id="${btn.dataset.id}"]`);
+        const member = li.querySelector('.h-edit-member').value;
+        const delta = parseInt(li.querySelector('.h-edit-delta').value, 10);
+        const reason = li.querySelector('.h-edit-reason').value;
+        try {
+          await api('/wish-tokens/' + btn.dataset.id, {
+            method: 'PATCH',
+            body: JSON.stringify({ member, delta, reason }),
+          });
+          await loadWishTokens();
+          applyHistoryFilter();
+        } catch (e) {
+          alert(e.message);
+        }
+      });
+    });
+  }
+
   return true;
 }
 
 async function loadWishTokens() {
   const data = await api('/wish-tokens');
+  wishHistoryCache = data.history;
 
   const grid = document.getElementById('balanceGrid');
   grid.innerHTML = data.balances
     .map(
       (b) => `
-      <div class="balance-item">
+      <div class="balance-item ${memberColorClass(b.name)}">
         <div class="name">${escapeHtml(b.name)}</div>
         <div class="num">${b.balance}</div>
       </div>`
@@ -221,12 +316,68 @@ async function loadWishTokens() {
 
   const recentEl = document.getElementById('historyListRecent');
   const emptyEl = document.getElementById('historyEmpty');
-  const hasRecent = renderHistoryItems(recentEl, data.history.slice(0, 3));
+  const hasRecent = renderHistoryItems(recentEl, data.history.slice(0, 3), { editable: false });
   emptyEl.style.display = hasRecent ? 'none' : 'block';
 
-  const fullEl = document.getElementById('historyListFull');
-  renderHistoryItems(fullEl, data.history);
+  if (document.getElementById('historyModal').classList.contains('active')) {
+    applyHistoryFilter();
+  }
 }
+
+// ---- 전체 이력 모달: 날짜 필터 ----
+function computeQuickRange(key) {
+  const to = new Date();
+  let from = null;
+  if (key === '1m') from = new Date(to.getFullYear(), to.getMonth() - 1, to.getDate());
+  else if (key === '3m') from = new Date(to.getFullYear(), to.getMonth() - 3, to.getDate());
+  else if (key === '6m') from = new Date(to.getFullYear(), to.getMonth() - 6, to.getDate());
+  else if (key === '1y') from = new Date(to.getFullYear() - 1, to.getMonth(), to.getDate());
+  return { from, to: key === 'all' ? null : to };
+}
+
+function toDateInputValue(d) {
+  if (!d) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function applyHistoryFilter() {
+  const fromVal = document.getElementById('historyFrom').value;
+  const toVal = document.getElementById('historyTo').value;
+  const fromTime = fromVal ? new Date(fromVal + 'T00:00:00').getTime() : null;
+  const toTime = toVal ? new Date(toVal + 'T23:59:59').getTime() : null;
+
+  const filtered = wishHistoryCache.filter((h) => {
+    const t = new Date(h.timestamp).getTime();
+    if (fromTime !== null && t < fromTime) return false;
+    if (toTime !== null && t > toTime) return false;
+    return true;
+  });
+
+  const fullEl = document.getElementById('historyListFull');
+  const emptyEl = document.getElementById('historyFullEmpty');
+  const has = renderHistoryItems(fullEl, filtered, { editable: true });
+  emptyEl.style.display = has ? 'none' : 'block';
+}
+
+document.querySelectorAll('.quick-filter-row button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.quick-filter-row button').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    const { from, to } = computeQuickRange(btn.dataset.range);
+    document.getElementById('historyFrom').value = toDateInputValue(from);
+    document.getElementById('historyTo').value = toDateInputValue(to);
+    applyHistoryFilter();
+  });
+});
+['historyFrom', 'historyTo'].forEach((id) => {
+  document.getElementById(id).addEventListener('change', () => {
+    document.querySelectorAll('.quick-filter-row button').forEach((b) => b.classList.remove('active'));
+    applyHistoryFilter();
+  });
+});
 
 // ============================================================
 // 집안일
@@ -315,10 +466,11 @@ function renderAssignmentCards(list) {
         `<button type="button" class="chip unassigned${a.assignee ? '' : ' selected'}" data-assignment-id="${a.id}" data-assignee="">미정</button>`,
       ]
         .concat(
-          membersCache.map(
-            (m) =>
-              `<button type="button" class="chip${m.name === a.assignee ? ' selected' : ''}" data-assignment-id="${a.id}" data-assignee="${escapeHtml(m.name)}">${escapeHtml(m.name)}</button>`
-          )
+          membersCache.map((m) => {
+            const selected = m.name === a.assignee;
+            const cls = selected ? ' selected ' + memberColorClass(m.name) : '';
+            return `<button type="button" class="chip${cls}" data-assignment-id="${a.id}" data-assignee="${escapeHtml(m.name)}">${escapeHtml(m.name)}</button>`;
+          })
         )
         .join('');
       return `<div class="assignment-card" data-id="${a.id}">
