@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>우리집 홈</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>🏡 우리집 홈</h1>
+    <button class="logout-btn" id="logoutBtn">로그아웃</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="wish">💝 소원권</button>
+    <button class="tab-btn" data-view="chore">🧹 집안일</button>
+  </nav>
+
+  <main>
+    <!-- ============ 소원권 ============ -->
+    <section id="view-wish" class="view active">
+      <div class="card">
+        <h2>현재 보유 개수</h2>
+        <div id="balanceGrid" class="balance-grid"></div>
+
+        <div class="form-row">
+          <select id="wishMember"></select>
+        </div>
+        <div class="form-row">
+          <div class="delta-buttons">
+            <button type="button" id="deltaMinus">−</button>
+            <input type="number" id="deltaAmount" value="1" min="1" />
+            <button type="button" id="deltaPlus">+</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <input type="text" id="wishReason" placeholder="사유 (예: 설거지 대신 해줌)" />
+        </div>
+        <div class="form-row">
+          <button class="btn-secondary" id="wishAddBtn" style="flex:1">➕ 더하기로 적용</button>
+          <button class="btn-secondary" id="wishSubBtn" style="flex:1">➖ 빼기로 적용</button>
+        </div>
+        <p id="wishMsg" class="msg"></p>
+      </div>
+
+      <div class="card">
+        <h2>변경 이력</h2>
+        <ul id="historyList" class="history-list"></ul>
+        <p id="historyEmpty" class="empty" style="display:none">아직 기록이 없어요.</p>
+      </div>
+    </section>
+
+    <!-- ============ 집안일 ============ -->
+    <section id="view-chore" class="view">
+      <div class="card">
+        <h2>월별 담당자</h2>
+        <div class="month-picker">
+          <input type="month" id="monthPicker" />
+        </div>
+        <div id="assignmentList"></div>
+        <p id="assignmentEmpty" class="empty" style="display:none">등록된 집안일이 없어요. 아래에서 추가해보세요.</p>
+        <p id="assignmentMsg" class="msg"></p>
+      </div>
+
+      <div class="card">
+        <details class="manage-section">
+          <summary>⚙️ 집안일 목록 관리</summary>
+          <div style="margin-top:12px">
+            <div id="choreManageList"></div>
+            <div class="form-row" style="margin-top:10px">
+              <input type="text" id="newChoreName" placeholder="새 집안일 이름" />
+              <button class="btn-secondary" id="addChoreBtn">추가</button>
+            </div>
+            <p id="choreMsg" class="msg"></p>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+:root {
+  --pink: #ff8fab;
+  --pink-light: #ffe5ec;
+  --lavender: #cdb4db;
+  --lavender-light: #f1e6fb;
+  --mint: #b8e0d2;
+  --text: #4a4453;
+  --text-soft: #8a8494;
+  --bg: #fdf7fb;
+  --card: #ffffff;
+  --danger: #e0607e;
+  --shadow: 0 4px 16px rgba(150, 100, 130, 0.12);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, var(--pink-light) 0%, var(--bg) 220px);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ---------- 로그인 화면 ---------- */
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+.login-emoji { font-size: 48px; }
+.login-card h1 { margin: 8px 0 4px; font-size: 22px; }
+.login-card .sub { color: var(--text-soft); margin-bottom: 24px; font-size: 14px; }
+.login-card input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  background: #faf7fa;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.login-card button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--pink);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.login-card button:hover { opacity: 0.92; }
+.error { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 10px; }
+
+/* ---------- 앱 레이아웃 ---------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 8px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.app-header h1 { font-size: 18px; margin: 0; }
+.logout-btn {
+  background: none;
+  border: none;
+  color: var(--text-soft);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 20px 12px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--text-soft);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.tab-btn.active {
+  background: var(--pink);
+  color: white;
+}
+
+main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 15px;
+  margin: 0 0 12px;
+  color: var(--text-soft);
+}
+
+/* 소원권 잔여 카드 */
+.balance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.balance-item {
+  background: linear-gradient(135deg, var(--pink-light), var(--lavender-light));
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+}
+.balance-item .name { font-size: 13px; color: var(--text-soft); margin-bottom: 4px; }
+.balance-item .num { font-size: 30px; font-weight: 700; color: var(--pink); }
+
+.form-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.form-row select,
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row input[type="month"] {
+  flex: 1;
+  min-width: 90px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #faf7fa;
+  font-size: 14px;
+}
+.delta-buttons { display: flex; gap: 6px; align-items: center; }
+.delta-buttons button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: var(--lavender-light);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+}
+.delta-buttons input {
+  width: 56px;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+}
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--pink);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.btn-primary:hover { opacity: 0.92; }
+.btn-secondary {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--lavender-light);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.msg { font-size: 13px; min-height: 16px; margin-top: 8px; }
+.msg.ok { color: #4d8f6c; }
+.msg.err { color: var(--danger); }
+
+/* 이력 리스트 */
+.history-list { list-style: none; margin: 0; padding: 0; }
+.history-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2edf2;
+  font-size: 13px;
+}
+.history-list li:last-child { border-bottom: none; }
+.history-list .h-left { color: var(--text-soft); }
+.history-list .h-member { font-weight: 600; color: var(--text); }
+.history-list .h-delta.plus { color: #4d8f6c; font-weight: 700; }
+.history-list .h-delta.minus { color: var(--danger); font-weight: 700; }
+
+/* 집안일 테이블 */
+.chore-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2edf2;
+}
+.chore-row:last-child { border-bottom: none; }
+.chore-row .chore-name { font-size: 14px; flex: 1; }
+.chore-row select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #faf7fa;
+  font-size: 13px;
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f2edf2;
+  font-size: 14px;
+}
+.manage-row:last-child { border-bottom: none; }
+.manage-row button {
+  border: none;
+  background: none;
+  color: var(--danger);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.empty { color: var(--text-soft); font-size: 13px; text-align: center; padding: 12px 0; }
+
+.month-picker { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.month-picker input { padding: 8px 12px; border-radius: 10px; border: 1px solid #eee; }
+
+details.manage-section summary {
+  cursor: pointer;
+  color: var(--text-soft);
+  font-size: 13px;
+  margin-top: 6px;
+}

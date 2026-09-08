@@ -1,0 +1,20 @@
+{
+  "name": "couple-home-app",
+  "version": "1.0.0",
+  "description": "부부용 소원권 관리 + 월별 집안일 담당자 배정 웹앱 (Google Sheets 저장, Render 배포)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "googleapis": "^140.0.1"
+  },
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>우리집 홈 - 로그인</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-emoji">🏡</div>
+      <h1>우리집 홈</h1>
+      <p class="sub">비밀번호를 입력해주세요</p>
+      <form id="loginForm">
+        <input type="password" id="password" placeholder="비밀번호" autocomplete="current-password" autofocus />
+        <button type="submit">입장하기</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorEl = document.getElementById('loginError');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.textContent = '';
+      const password = document.getElementById('password').value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          window.location.href = '/';
+        } else {
+          errorEl.textContent = data.error || '로그인에 실패했습니다.';
+        }
+      } catch (err) {
+        errorEl.textContent = '서버에 연결할 수 없습니다.';
+      }
+    });
+  </script>
+</body>
+</html>
