@@ -485,6 +485,39 @@ main {
 
 .empty { color: var(--text-soft); font-size: 13px; text-align: center; padding: 12px 0; }
 
+/* 뽑기 모달 */
+.draw-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2edf2;
+  font-size: 14px;
+}
+.draw-item:last-child { border-bottom: none; }
+.draw-result-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, var(--pink-light), var(--lavender-light));
+  border-radius: 16px;
+  min-height: 32px;
+}
+.draw-pop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: popIn 0.3s ease;
+}
+.draw-arrow { color: var(--text-soft); font-size: 18px; }
+.draw-chore-name { font-size: 17px; font-weight: 800; color: var(--text); }
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* ---------- 모달 ---------- */
 .modal-overlay {
   display: none;

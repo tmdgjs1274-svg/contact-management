@@ -646,3 +646,90 @@ document.getElementById('addChoreBtn').addEventListener('click', async () => {
     showMsg(msgEl, e.message, false);
   }
 });
+
+// ---- 집안일 뽑기 ----
+// 담당자(사람)는 이미 정해진 상태에서, 그 사람이 어떤 미정 집안일을 맡을지를 랜덤으로 뽑는다.
+let drawPendingItems = []; // 이번 달 배정 중 미정(assignee === '')인 것들
+let currentDrawnItem = null; // 이번 라운드에 뽑힌 집안일 (아직 "적용" 전, 미리보기 상태)
+
+document.getElementById('openDrawModalBtn').addEventListener('click', openDrawModal);
+
+async function openDrawModal() {
+  document.getElementById('drawMsg').textContent = '';
+  document.getElementById('drawResultWrap').style.display = 'none';
+  currentDrawnItem = null;
+
+  populateDrawMemberSelect();
+  await refreshDrawPending();
+  openModal('drawModal');
+}
+
+function populateDrawMemberSelect() {
+  const select = document.getElementById('drawMemberSelect');
+  select.innerHTML = membersCache
+    .map((m) => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`)
+    .join('');
+}
+
+async function refreshDrawPending() {
+  const assignments = await api('/assignments?month=' + encodeURIComponent(currentMonthStr()));
+  drawPendingItems = assignments.filter((a) => !a.assignee);
+
+  const listEl = document.getElementById('drawPendingList');
+  const emptyEl = document.getElementById('drawEmpty');
+  const introEl = document.getElementById('drawIntro');
+  const controlsEl = document.getElementById('drawControls');
+
+  if (drawPendingItems.length === 0) {
+    listEl.innerHTML = '';
+    introEl.textContent = '';
+    emptyEl.style.display = 'block';
+    controlsEl.style.display = 'none';
+  } else {
+    emptyEl.style.display = 'none';
+    controlsEl.style.display = 'block';
+    introEl.textContent = `아직 미정인 집안일이 ${drawPendingItems.length}개 남았어요.`;
+    listEl.innerHTML = drawPendingItems
+      .map(
+        (a) => `<div class="draw-item"><span>${escapeHtml(a.choreName)}</span><span class="chip unassigned selected">미정</span></div>`
+      )
+      .join('');
+  }
+}
+
+function runDraw() {
+  if (drawPendingItems.length === 0) return;
+  currentDrawnItem = drawPendingItems[Math.floor(Math.random() * drawPendingItems.length)];
+  const member = document.getElementById('drawMemberSelect').value;
+
+  const resultBox = document.getElementById('drawResultBox');
+  resultBox.innerHTML = `<div class="draw-pop">
+    <span class="name-badge ${memberColorClass(member)}">${escapeHtml(member)}</span>
+    <span class="draw-arrow">→</span>
+    <span class="draw-chore-name">${escapeHtml(currentDrawnItem.choreName)}</span>
+  </div>`;
+
+  document.getElementById('drawResultWrap').style.display = 'block';
+}
+
+document.getElementById('startDrawBtn').addEventListener('click', runDraw);
+document.getElementById('redrawBtn').addEventListener('click', runDraw);
+
+document.getElementById('applyDrawBtn').addEventListener('click', async () => {
+  if (!currentDrawnItem) return;
+  const msgEl = document.getElementById('drawMsg');
+  const member = document.getElementById('drawMemberSelect').value;
+  try {
+    await api('/assignments', {
+      method: 'POST',
+      body: JSON.stringify({ month: currentMonthStr(), choreId: currentDrawnItem.choreId, assignee: member }),
+    });
+    showMsg(msgEl, `"${currentDrawnItem.choreName}" → ${member}(으)로 적용했어요!`, true);
+    loadAssignments(currentMonthStr());
+
+    currentDrawnItem = null;
+    closeModal('drawModal');
+  } catch (e) {
+    showMsg(msgEl, e.message, false);
+  }
+});

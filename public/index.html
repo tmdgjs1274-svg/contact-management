@@ -56,7 +56,10 @@
         <div id="assignmentCards" class="assignment-cards"></div>
         <p id="assignmentEmpty" class="empty" style="display:none">아직 이 달에 추가된 집안일이 없어요.</p>
 
-        <button class="btn-secondary btn-block" id="openAddChoreModalBtn" style="margin-top:12px">➕ 이 달에 집안일 추가</button>
+        <div class="form-row" style="margin-top:12px">
+          <button class="btn-secondary" id="openAddChoreModalBtn" style="flex:1">➕ 이 달에 집안일 추가</button>
+          <button class="btn-secondary" id="openDrawModalBtn" style="flex:1">🎲 뽑기</button>
+        </div>
         <p id="assignmentMsg" class="msg"></p>
       </div>
     </section>
@@ -162,6 +165,39 @@
         <div id="availableChoreList"></div>
         <p id="availableChoreEmpty" class="empty" style="display:none">추가할 수 있는 집안일이 없어요. 먼저 ⚙️ 목록 관리에서 만들어주세요.</p>
         <p id="addChoreMsg" class="msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 모달: 집안일 뽑기 ============ -->
+  <div class="modal-overlay" id="drawModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🎲 집안일 뽑기</h3>
+        <button class="modal-close" data-close>✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="drawIntro" class="modal-subtitle"></p>
+        <div id="drawPendingList"></div>
+        <p id="drawEmpty" class="empty" style="display:none">미정인 집안일이 없어요. 모두 담당자가 지정되어 있어요!</p>
+
+        <div id="drawControls" style="margin-top:14px;">
+          <h4 class="modal-subtitle">누구를 뽑을까요?</h4>
+          <div class="form-row">
+            <select id="drawMemberSelect"></select>
+          </div>
+          <button class="btn-primary btn-block" id="startDrawBtn">🎲 뽑기 시작</button>
+        </div>
+
+        <div id="drawResultWrap" style="display:none; margin-top:16px;">
+          <h4 class="modal-subtitle">뽑기 결과</h4>
+          <div id="drawResultBox" class="draw-result-box"></div>
+          <div class="form-row" style="margin-top:12px">
+            <button class="btn-secondary" id="redrawBtn" style="flex:1">🔄 다시 뽑기</button>
+            <button class="btn-primary" id="applyDrawBtn" style="flex:1">✅ 적용</button>
+          </div>
+        </div>
+        <p id="drawMsg" class="msg"></p>
       </div>
     </div>
   </div>
